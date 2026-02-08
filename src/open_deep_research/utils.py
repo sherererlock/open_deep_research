@@ -83,10 +83,12 @@ async def tavily_search(
     
     # Initialize summarization model with retry logic
     model_api_key = get_api_key_for_model(configurable.summarization_model, config)
+    model_base_url = get_base_url_for_model(configurable.summarization_model)
     summarization_model = init_chat_model(
         model=configurable.summarization_model,
         max_tokens=configurable.summarization_model_max_tokens,
         api_key=model_api_key,
+        base_url=model_base_url,
         tags=["langsmith:nostream"]
     ).with_structured_output(Summary).with_retry(
         stop_after_attempt=configurable.max_structured_output_retries
@@ -889,10 +891,25 @@ def get_config_value(value):
     else:
         return value.value
 
+def get_base_url_for_model(model_name: str) -> Optional[str]:
+    """Get base URL for a specific model from environment."""
+    model_name = model_name.lower()
+    longcat_model = os.getenv("LONGCAT_MODEL", "").lower()
+    
+    if longcat_model and (longcat_model in model_name or "longcat" in model_name):
+        return os.getenv("LONGCAT_API_URL")
+    
+    return None
+
 def get_api_key_for_model(model_name: str, config: RunnableConfig):
     """Get API key for a specific model from environment or config."""
     should_get_from_config = os.getenv("GET_API_KEYS_FROM_CONFIG", "false")
     model_name = model_name.lower()
+    
+    longcat_model = os.getenv("LONGCAT_MODEL", "").lower()
+    if longcat_model and (longcat_model in model_name or "longcat" in model_name):
+         return os.getenv("LONGCAT_API_KEY")
+
     if should_get_from_config.lower() == "true":
         api_keys = config.get("configurable", {}).get("apiKeys", {})
         if not api_keys:

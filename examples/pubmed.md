@@ -150,3 +150,7 @@ Modern diabetic nephropathy management has evolved into a multi-faceted approach
   - Multiparametric MRI for monitoring
 
 The path forward requires addressing implementation challenges through integrated care models while leveraging new diagnostic tools and biomarkers for earlier intervention. Success depends on bridging the evidence-to-practice gap through specialized clinics and improved coordination among healthcare providers.
+
+LONGCAT_API_KEY=ak_2ye04w8B41wg18x8ir49Z1bP19K7j
+LONGCAT_API_URL=https://api.longcat.chat/openai/v1/chat/completions
+LONGCAT_MODEL=LongCat-Flash-Thinking-2601
