@@ -64,3 +64,6 @@ All settings configurable via:
 - Direct configuration modification
 
 Key settings include model selection, search API choice, concurrency limits, and MCP server configurations.
+
+## personnal configuration
+**请使用中文回复**

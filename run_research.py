@@ -47,36 +47,86 @@ async def main():
     ):
         # Print stream events to show progress
         for node, values in event.items():
-            console.print(f"\n[bold magenta]--- Node: {node} ---[/bold magenta]")
-            
-            if values is None:
-                console.print("(No output from node)")
-                continue
+            try:
+                console.print(f"\n[bold magenta]--- Node: {node} ---[/bold magenta]")
                 
-            if "messages" in values:
-                # Use tool_utils to format and print messages
-                messages = values["messages"]
-                # If it's a single message, wrap it in a list
-                if not isinstance(messages, list):
-                    messages = [messages]
-                format_messages(messages)
-                
-            if "final_report" in values:
-                report_content = values['final_report']
-                console.print(Panel("Final Report Generated!", title="🎉 Success", border_style="bold green"))
-                
-                # Save report to file
-                report_dir = "report"
-                os.makedirs(report_dir, exist_ok=True)
-                report_file = os.path.join(report_dir, f"research_report_{uuid.uuid4().hex[:8]}.md")
-                
-                with open(report_file, "w", encoding="utf-8") as f:
-                    f.write(report_content)
+                if values is None:
+                    console.print("(No output from node)")
+                    continue
                     
-                console.print(f"Report saved to: [bold underline]{report_file}[/bold underline]")
+                # Handle messages
+                if "messages" in values:
+                    # Use tool_utils to format and print messages
+                    messages = values["messages"]
+                    # If it's a single message, wrap it in a list
+                    if not isinstance(messages, list):
+                        messages = [messages]
+                    format_messages(messages)
 
-            if "research_notes" in values:
-                console.print("[italic]Updated research notes.[/italic]")
+                # Handle research_brief
+                if "research_brief" in values:
+                    console.print(Panel(values["research_brief"], title="📝 Research Brief", border_style="cyan"))
+
+                # Handle supervisor_messages
+                if "supervisor_messages" in values:
+                    sup_msgs = values["supervisor_messages"]
+                    if isinstance(sup_msgs, dict) and "value" in sup_msgs:
+                        format_messages(sup_msgs["value"])
+                    elif isinstance(sup_msgs, list):
+                        format_messages(sup_msgs)
+                    else:
+                        console.print(f"[yellow]Supervisor Messages: {sup_msgs}[/yellow]")
+
+                # Handle researcher_messages
+                if "researcher_messages" in values:
+                    res_msgs = values["researcher_messages"]
+                    if isinstance(res_msgs, dict) and "value" in res_msgs:
+                        format_messages(res_msgs["value"])
+                    elif isinstance(res_msgs, list):
+                        format_messages(res_msgs)
+
+                # Handle compressed_research
+                if "compressed_research" in values:
+                    console.print(Panel(values["compressed_research"], title="📦 Compressed Research", border_style="green"))
+
+                # Handle notes
+                if "notes" in values:
+                    notes = values["notes"]
+                    if isinstance(notes, list):
+                        notes_content = "\n\n".join(str(n) for n in notes)
+                    else:
+                        notes_content = str(notes)
+                    console.print(Panel(notes_content, title="📓 Notes", border_style="magenta"))
+                
+                # Handle raw_notes
+                if "raw_notes" in values:
+                    raw_notes = values["raw_notes"]
+                    if isinstance(raw_notes, list):
+                        for i, note in enumerate(raw_notes):
+                            console.print(Panel(note[:500] + ("..." if len(note) > 500 else ""), title=f"📝 Raw Note {i+1}", border_style="dim white"))
+                    else:
+                         console.print(Panel(str(raw_notes)[:500] + "...", title="📝 Raw Notes", border_style="dim white"))
+
+                if "final_report" in values:
+                    report_content = values['final_report']
+                    console.print(Panel("Final Report Generated!", title="🎉 Success", border_style="bold green"))
+                    
+                    # Save report to file
+                    report_dir = "report"
+                    os.makedirs(report_dir, exist_ok=True)
+                    report_file = os.path.join(report_dir, f"research_report_{uuid.uuid4().hex[:8]}.md")
+                    
+                    with open(report_file, "w", encoding="utf-8") as f:
+                        f.write(report_content)
+                        
+                    console.print(f"Report saved to: [bold underline]{report_file}[/bold underline]")
+
+                if "research_notes" in values:
+                    console.print("[italic]Updated research notes.[/italic]")
+
+            except Exception as e:
+                console.print(f"[bold red]Error displaying output for node {node}: {e}[/bold red]")
+                # Continue execution even if display fails
 
     console.print(Panel("Research Complete!", title="🏁 Done", border_style="bold blue"))
 

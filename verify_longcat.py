@@ -5,8 +5,11 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage
 
+import langchain
+
 # Load environment variables
 load_dotenv(".env")
+langchain.debug = True
 
 async def main():
     model_name = os.getenv("RESEARCH_MODEL")
